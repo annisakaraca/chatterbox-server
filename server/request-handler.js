@@ -12,12 +12,12 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
-const url = require('url');
+var url = require('url');
 
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
+  'access-control-allow-headers': 'content-type, accept, X-Parse-Application-Id, X-Parse-REST-API-Key',
   'access-control-max-age': 10 // Seconds.
 };
 
@@ -38,7 +38,10 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
+  
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+
+  
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -50,7 +53,6 @@ var requestHandler = function(request, response) {
   headers['Content-Type'] = 'application/json';
 
   const myURL = url.parse(request.url, true);
-  console.log(myURL);
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -75,6 +77,10 @@ var requestHandler = function(request, response) {
     } else if (request.method === 'GET') {
       response.writeHead(200, headers);
       response.end(JSON.stringify({results: messages}));
+    } else if (request.method === 'OPTIONS') {
+      response.writeHead(200, headers);
+      response.end('success');
+      console.log('sent out options');
     }
   }
 
