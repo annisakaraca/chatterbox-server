@@ -12,6 +12,8 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+const url = require('url');
+
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -47,10 +49,13 @@ var requestHandler = function(request, response) {
   // other than plain text, like JSON or HTML.
   headers['Content-Type'] = 'application/json';
 
+  const myURL = url.parse(request.url, true);
+  console.log(myURL);
+
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
 
-  if (request.url !== '/classes/messages') {
+  if (myURL.pathname !== '/classes/messages') {
     response.writeHead(404, headers);
     response.end('{}');
   } else {
@@ -62,7 +67,9 @@ var requestHandler = function(request, response) {
         string += chunk;
       });
       request.on('end', function() {
-        messages.push(JSON.parse(string));
+        var msgObj = JSON.parse(string);
+        msgObj.createdAt = new Date();
+        messages.push(msgObj);
         response.end(JSON.stringify({results: messages}));
       });
     } else if (request.method === 'GET') {
