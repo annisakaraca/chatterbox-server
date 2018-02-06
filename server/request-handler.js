@@ -21,7 +21,23 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var messages = [];
+var messages = [
+// {
+//   username: 'Mel Brooks',
+//   text: 'Never underestimate the power of the Schwartz! if sorted I should be 2nd',
+//   roomname: 'lobby',
+//   createdAt: 1,
+//   objectId: 0
+// }, {
+//   username: 'Mel Brooks',
+//   text: 'It\'s good to be the king! if sorted I should be first',
+//   roomname: 'lobby',
+//   createdAt: 2,
+//   objectId: 1
+// }
+];
+
+var lastObjId = 1;
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -52,7 +68,19 @@ var requestHandler = function(request, response) {
   // other than plain text, like JSON or HTML.
   headers['Content-Type'] = 'application/json';
 
-  const myURL = url.parse(request.url, true);
+  var myURL = url.parse(request.url, true);
+  if (myURL.query.order === '-createdAt') {
+    var compareFunction = function(a, b) {
+      if (a.createdAt > b.createdAt) {
+        return -1;
+      } else if (a.createdAt < b.createdAt) {
+        return 1;
+      } else {
+        return 0;
+      }
+    };
+    messages.sort(compareFunction);
+  }
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -69,8 +97,21 @@ var requestHandler = function(request, response) {
         string += chunk;
       });
       request.on('end', function() {
-        var msgObj = JSON.parse(string);
+        if (request.headers && request.headers['content-type'] === 'application/x-www-form-urlencoded; charset=UTF-8') {
+          var msgObj = {};
+          var keyValues = string.split('&');
+          for (var i = 0; i < keyValues.length; i++) {
+            var kvTuple = keyValues[i].split('=');
+            kvTuple[1] = kvTuple[1].split('+').join(' ');
+            msgObj[kvTuple[0]] = kvTuple[1];
+          }
+          console.log(msgObj);
+        } else {
+          var msgObj = JSON.parse(string);
+        }
         msgObj.createdAt = new Date();
+        lastObjId++;
+        msgObj.objectId = lastObjId;
         messages.push(msgObj);
         response.end(JSON.stringify({results: messages}));
       });

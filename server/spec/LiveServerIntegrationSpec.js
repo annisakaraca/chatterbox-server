@@ -1,6 +1,6 @@
-var request = require('../request-handler.js');
+var request = require('request');
 var expect = require('chai').expect;
-request = request.requestHandler;
+//request = request.requestHandler;
 
 describe('server', function() {
   it('should respond to GET requests for /classes/messages with a 200 status code', function(done) {
