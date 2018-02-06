@@ -1,4 +1,4 @@
-var handler = require('../request-handler');
+var handler = require('../request-handler.js');
 var expect = require('chai').expect;
 var stubs = require('./Stubs');
 
@@ -87,7 +87,7 @@ describe('Node Server Request Listener Function', function() {
 
     expect(res._responseCode).to.equal(201);
 
-      // Now if we request the log for that room the message we posted should be there:
+    // Now if we request the log for that room the message we posted should be there:
     req = new stubs.request('/classes/messages', 'GET');
     res = new stubs.response();
 
